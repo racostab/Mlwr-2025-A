@@ -1,6 +1,7 @@
 # Sistemas Operativos
 ## Asignatura
 Ciclo escolar: 2024-B
+
 Sede: CIC
 
 ## Estructura
