@@ -1,1 +1,1 @@
-# Carpeta de Daniel Castro
+# Carpeta principal de Sistemas Operativos - Daniel Castro
