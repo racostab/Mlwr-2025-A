@@ -3,7 +3,7 @@ Programa que crea un proceso y seguidamente crealiza una sincronización de PID 
 subsecuente, gracias al comando "execl" a través de la libreria "os" , esto quiere decir que el
 proceso del padre lo obtendra la efecución del comando ps -f (se coloa f y no fea para visualizar
 rapidamente el PID) por lo que en ese momento se detendrá el código de ejecución y no imprime el 
-print despues de la sincronización.
+print despues de la sincronización ya que se cambio el proceso.
 '''
 import os
 import time
