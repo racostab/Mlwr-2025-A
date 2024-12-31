@@ -8,10 +8,15 @@ Carpeta que contiene las practicas realizadas en clase de SO en diferentes lengu
 
 ## Lenguajes
 Python
+
 C
+
 C++
+
 Java
+
 C#
+
 bash
 
 ## Centro de investigación en computación - IPN
