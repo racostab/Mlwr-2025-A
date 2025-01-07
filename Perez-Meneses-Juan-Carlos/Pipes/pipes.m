@@ -1,55 +1,22 @@
 #import <Foundation/Foundation.h>
-#include <unistd.h>
-#include <stdio.h>
-
-@interface PipeWriter : NSObject {
-    int fd[2]; // Descriptores de archivo para la tubería
-    const char *buf;
-}
-
-- (instancetype)initWithBuffer:(const char *)buffer;
-- (void)writeToPipe;
-- (void)closePipe;
-
-@end
-
-@implementation PipeWriter
-
-- (instancetype)initWithBuffer:(const char *)buffer {
-    self = [super init];
-    if (self) {
-        buf = buffer;
-        if (pipe(fd) < 0) {
-            NSLog(@"Error en la creación del pipe");
-            exit(1);
-        }
-    }
-    return self;
-}
-
-- (void)writeToPipe {
-    int i = 0;
-    while (1) {
-        write(fd[1], buf, 1); // Escribe un byte en la tubería
-        printf("%d ", i++);
-        fflush(stdout); // Asegura que el buffer de salida se imprima
-    }
-}
-
-- (void)closePipe {
-    close(fd[0]);
-    close(fd[1]);
-}
-
-@end
+#import <unistd.h>
+#import <sys/types.h>
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        const char *buffer = "a";
-        PipeWriter *writer = [[PipeWriter alloc] initWithBuffer:buffer];
-        [writer writeToPipe];
-        [writer closePipe];
-    }
+    
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];  
+    
+    pid_t pid = getpid();
+    NSLog(@"El pid actual es: %d", pid);
+    
+    // Ejecuta el comando ps con los parámetros -fea
+    execl("/usr/bin/ps", "ps", "-fea", (char *)NULL);
+    
+    // Esta línea nunca se verá
+    NSLog(@"Nunca me verán");
+    
+    // Liberar el pool
+    [pool release];
     return 0;
 }
 
