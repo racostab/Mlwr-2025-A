@@ -1,31 +1,22 @@
 import os
 import sys
+import struct
 
-class PipeWriter:
-    def __init__(self, buffer):
-        self.buf = buffer.encode('utf-8')  # Convertir el buffer a bytes
-        self.fd_read, self.fd_write = os.pipe()  # Crear la tubería
+# python ./pipes.py
 
-    def write_to_pipe(self):
-        i = 0
-        try:
-            while True:
-                os.write(self.fd_write, self.buf)  # Escribir un byte en la tubería
-                print(i, end=" ", flush=True)  # Mostrar el contador
-                i += 1
-        except KeyboardInterrupt:
-            print("\nPrograma detenido manualmente.")
+def main():
+    fd = os.pipe()
+    i = 0
 
-    def close_pipe(self):
-        os.close(self.fd_read)
-        os.close(self.fd_write)
-
+    try:
+        while True:
+            buf = struct.pack('i', i)
+            os.write(fd[1], buf)
+            print(i, end=' ', flush=True)
+            i += 1
+    except KeyboardInterrupt:
+        print("\nPrograma interrumpido")
+        sys.exit(0)
 
 if __name__ == "__main__":
-    buffer = "a"
-    writer = PipeWriter(buffer)
-    try:
-        writer.write_to_pipe()
-    finally:
-        writer.close_pipe()
-
+    main()
