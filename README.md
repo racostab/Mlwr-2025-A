@@ -1,6 +1,6 @@
-# Sistemas Operativos
+# Análisis y Detección de Malware
 ## Asignatura
-Ciclo escolar: 2024-B
+Ciclo escolar: 2025-A
 
 Sede: CIC
 
