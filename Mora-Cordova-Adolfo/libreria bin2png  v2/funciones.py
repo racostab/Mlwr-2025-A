@@ -1,21 +1,11 @@
-import os
-import cv2
-import json
-import hashlib
-import capstone
+import os, cv2, json, hashlib, capstone, time
 import numpy as np
 from PIL import Image
 from math import ceil, log2
 from scipy.fftpack import dct
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import time
 
-
-
-
-    
-    
 def bin2rgb (entrada: str, salida: str, ancho: int=2325, alto: int=2325):
 
         try:
@@ -252,10 +242,6 @@ def simhash(entrada: str, salida: str, force: bool = False):
             print(f"[✓] Imagen guardada en: {salida}")
         except Exception as e:
             print(f'[X] Error en simhash: {e}')
-
-
-
-
 
 
 mapping = {

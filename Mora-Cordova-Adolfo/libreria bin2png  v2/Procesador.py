@@ -1,11 +1,7 @@
-import json
-import time
+import json, time, os
 from funciones import GeneradorDeImagenes
-import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from funciones import markov, simhash, bigram_dct, bin2rgb, wem
-
-
 
 
 def main():
@@ -30,7 +26,7 @@ def main():
         # === EJECUCIÓN EN PARALELO CON PROCESOS ===
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             for algorithm in algorithms:
-                output_dir = os.path.join('Resultados', algorithm)
+                output_dir = os.path.join('Images', algorithm)
                 os.makedirs(output_dir, exist_ok=True)
 
                 # Añadir tareas al pool de procesos
