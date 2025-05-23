@@ -55,8 +55,9 @@ def main():
         print(f"\n===== Procesamiento Completo =====")
         print(f"Tiempo total de procesamiento: {duracion_total:.2f} segundos")
 
-        # Guardar log
-        with open('procesamiento_total.log', 'a') as log_file:
+        # Bitacora log
+        log_dir = os.path.join('Images', "registro_operaciones.log")
+        with open(log_dir, 'a') as log_file:
             log_file.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Tiempo total: {duracion_total:.2f} segundos\n")
 
     except Exception as e:
