@@ -1,0 +1,18 @@
+The algorithms that were implemented are:
+
+1. 
+   Paper "Malware Detection Using Frequency Domain-Based Image Visualization and Deep Learning"
+         Tajuddin Manhar Mohammed, Lakshmanan Nataraj, Satish Chikkagoudar, Shivkumar Chandrasekaran, B.S. Manjunath
+   doi: https://doi.org/10.48550/arXiv.2101.10578
+   Algoritmo
+        The executable binaries are represented as grayscale images obtained from the count of N-grams (N=2) of bytes 
+        in the Discrete Cosine Transform (DCT) domain.
+2. Paper
+   doi: 
+3. Paper
+   doi: 
+4. Paper
+   doi: 
+5. Paper
+   doi: 
+   
