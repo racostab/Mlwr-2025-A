@@ -6,29 +6,41 @@ from scipy.fftpack import dct
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-def bin2rgb (entrada: str, salida: str, ancho: int=2325, alto: int=2325):
+mapping = {
+            'bigram_dct': bigram_dct,
+            'bin2rgb':    bin2rgb,
+            'simhash':    simhash,
+            'markov':     markov,
+            'wem':        wem
+}
 
+class GeneradorDeImagenes:   
+
+    def procesar_archivo(algorithm, file, input_dir, output_dir):
+        
+        method = mapping.get(algorithm, None)
+        if not method:
+            print(f'[!] Técnica no soportada: {algorithm}')
+            return
+
+        entrada = os.path.join(input_dir, file)
+        salida = os.path.join(output_dir, f"{os.path.splitext(file)[0]}.png")
+        
+        print(f"[*] Ejecutando: {algorithm} para {file}")
+        start_time = time.time()
+        
         try:
-            with open(entrada, 'rb') as f:
-                contenido = f.read()
-
-            datos = np.frombuffer(contenido, dtype=np.uint8)
-
-            tbytes = ancho * alto * 3
-
-            if len(datos) < tbytes:
-                datos = np.pad(datos, (0, tbytes - len(datos)), mode='constant', constant_values=0)
-            else:
-                datos = datos[:tbytes]
-
-            imagen_array = datos.reshape((alto, ancho, 3))
-            imagen = Image.fromarray(imagen_array.astype('uint8'), 'RGB')
-            imagen.save(salida)
-            print(f"Imagen guardada en: {salida}")
+            method(entrada, salida)
+            end_time = time.time()
+            duracion = end_time - start_time
+            print(f"[✓] {file} procesado con {algorithm} en {duracion:.2f} segundos")
         except Exception as e:
-            print(f"Error en bin2rgb: {e}")
+            print(f"[X] Error procesando {file} con {algorithm}: {e}")
 
-    
+
+#----------------------
+# Algorithm 1: DCT
+#----------------------
 def bigram_dct (entrada: str, salida: str):
 
         try:
@@ -59,77 +71,36 @@ def bigram_dct (entrada: str, salida: str):
             print(f"Error en bigram_dct: {e}")
 
 
-   
-def wem(entrada: str, salida: str, window_size: int = 1024, step_size: int = 256, L: int = 2, delta: float = 0.2, shape=(16, 32)):
+#----------------------
+# Algorithm 2: Bin2grb
+#----------------------
+def bin2rgb (entrada: str, salida: str, ancho: int=2325, alto: int=2325):
 
         try:
             with open(entrada, 'rb') as f:
-                byte_seq = list(f.read())
+                contenido = f.read()
 
-            T = (len(byte_seq) - window_size) // step_size + 1
-            if T <= 0:
-                raise ValueError("Archivo muy pequeño para construir WEM")
+            datos = np.frombuffer(contenido, dtype=np.uint8)
 
-            H = np.zeros((T, 256))  
-            B = np.zeros((L, 256))  
+            tbytes = ancho * alto * 3
 
-            for k in range(T):
-                window = byte_seq[k * step_size : k * step_size + window_size]
-                counts = Counter(window)
-                total = len(window)
-                
-                for j in range(256):
-                    p = counts.get(j, 0) / total
-                    if p > 0:
-                        H[k][j] = -p * log2(p)
+            if len(datos) < tbytes:
+                datos = np.pad(datos, (0, tbytes - len(datos)), mode='constant', constant_values=0)
+            else:
+                datos = datos[:tbytes]
 
-            C = np.cumsum(H, axis=0)
-            for k in range(T):
-                for j in range(256):
-                    l = ceil(C[k][j] / delta)
-                    l = max(1, min(L, l)) - 1
-                    B[l][j] += H[k][j]
-
-            flat = B.flatten()
-            img_array = flat.reshape(shape)
-            img_array = (img_array / np.max(img_array) * 255).astype(np.uint8)
-
-            Image.fromarray(img_array, mode='L').save(salida)
-            print(f'[✓] Imagen WEM guardada en: {salida}')
-
-        except Exception as e:
-            print(f'[X] Error en WEM: {e}')
-
-
-   
-def markov(entrada: str, salida: str):
-
-        try:    
-            with open(entrada, 'rb') as f:
-                datos = f.read()
-
-            matriz_frecuencia = np.zeros((256, 256), dtype=np.uint32)
-
-            for i in range(len(datos) - 1):
-                byteA = datos[i]
-                byteS = datos[i + 1]
-                matriz_frecuencia[byteA, byteS] += 1
-            
-            sum_filas = matriz_frecuencia.sum(axis=1, keepdims=True)
-            sum_filas[sum_filas == 0] = 1
-            matriz_probabilidad = matriz_frecuencia / sum_filas
-
-            img = (matriz_probabilidad * 255).astype(np.uint8)
-
-            imagen = Image.fromarray(img, mode='L')
+            imagen_array = datos.reshape((alto, ancho, 3))
+            imagen = Image.fromarray(imagen_array.astype('uint8'), 'RGB')
             imagen.save(salida)
             print(f"Imagen guardada en: {salida}")
         except Exception as e:
-            print(f"Error en markov: {e}")
+            print(f"Error en bin2rgb: {e}")
 
-    
+ 
+#----------------------
+# Algorithm 3: SimHash
+#----------------------
 def simhash(entrada: str, salida: str, force: bool = False):
-    
 
         def extract_opcodes(file_path, force=False):
             with open(file_path, "rb") as f:
@@ -244,34 +215,74 @@ def simhash(entrada: str, salida: str, force: bool = False):
             print(f'[X] Error en simhash: {e}')
 
 
-mapping = {
-            'markov': markov,
-            'simhash': simhash,
-            'bigram_dct': bigram_dct,
-            'bin2rgb': bin2rgb,
-            'wem': wem
-        }
-class GeneradorDeImagenes:   
+#----------------------
+# Algorithm 4: Byte-markov
+#----------------------
+def markov(entrada: str, salida: str):
 
-    def procesar_archivo(algorithm, file, input_dir, output_dir):
-        
+        try:    
+            with open(entrada, 'rb') as f:
+                datos = f.read()
 
-        
-        method = mapping.get(algorithm, None)
-        if not method:
-            print(f'[!] Técnica no soportada: {algorithm}')
-            return
+            matriz_frecuencia = np.zeros((256, 256), dtype=np.uint32)
 
-        entrada = os.path.join(input_dir, file)
-        salida = os.path.join(output_dir, f"{os.path.splitext(file)[0]}.png")
-        
-        print(f"[*] Ejecutando: {algorithm} para {file}")
-        start_time = time.time()
-        
-        try:
-            method(entrada, salida)
-            end_time = time.time()
-            duracion = end_time - start_time
-            print(f"[✓] {file} procesado con {algorithm} en {duracion:.2f} segundos")
+            for i in range(len(datos) - 1):
+                byteA = datos[i]
+                byteS = datos[i + 1]
+                matriz_frecuencia[byteA, byteS] += 1
+            
+            sum_filas = matriz_frecuencia.sum(axis=1, keepdims=True)
+            sum_filas[sum_filas == 0] = 1
+            matriz_probabilidad = matriz_frecuencia / sum_filas
+
+            img = (matriz_probabilidad * 255).astype(np.uint8)
+
+            imagen = Image.fromarray(img, mode='L')
+            imagen.save(salida)
+            print(f"Imagen guardada en: {salida}")
         except Exception as e:
-            print(f"[X] Error procesando {file} con {algorithm}: {e}")
+            print(f"Error en markov: {e}")
+
+
+#----------------------
+# Algorithm 5: WEM
+#----------------------
+def wem(entrada: str, salida: str, window_size: int = 1024, step_size: int = 256, L: int = 2, delta: float = 0.2, shape=(16, 32)):
+
+        try:
+            with open(entrada, 'rb') as f:
+                byte_seq = list(f.read())
+
+            T = (len(byte_seq) - window_size) // step_size + 1
+            if T <= 0:
+                raise ValueError("Archivo muy pequeño para construir WEM")
+
+            H = np.zeros((T, 256))  
+            B = np.zeros((L, 256))  
+
+            for k in range(T):
+                window = byte_seq[k * step_size : k * step_size + window_size]
+                counts = Counter(window)
+                total = len(window)
+                
+                for j in range(256):
+                    p = counts.get(j, 0) / total
+                    if p > 0:
+                        H[k][j] = -p * log2(p)
+
+            C = np.cumsum(H, axis=0)
+            for k in range(T):
+                for j in range(256):
+                    l = ceil(C[k][j] / delta)
+                    l = max(1, min(L, l)) - 1
+                    B[l][j] += H[k][j]
+
+            flat = B.flatten()
+            img_array = flat.reshape(shape)
+            img_array = (img_array / np.max(img_array) * 255).astype(np.uint8)
+
+            Image.fromarray(img_array, mode='L').save(salida)
+            print(f'[✓] Imagen WEM guardada en: {salida}')
+
+        except Exception as e:
+            print(f'[X] Error en WEM: {e}')
