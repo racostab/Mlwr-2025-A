@@ -6,13 +6,6 @@ from scipy.fftpack import dct
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-mapping = {
-            'bigram_dct': bigram_dct,
-            'bin2rgb':    bin2rgb,
-            'simhash':    simhash,
-            'markov':     markov,
-            'wem':        wem
-}
 
 class GeneradorDeImagenes:   
 
@@ -286,3 +279,11 @@ def wem(entrada: str, salida: str, window_size: int = 1024, step_size: int = 256
 
         except Exception as e:
             print(f'[X] Error en WEM: {e}')
+
+mapping = {
+            'bigram_dct': bigram_dct,
+            'bin2rgb':    bin2rgb,
+            'simhash':    simhash,
+            'markov':     markov,
+            'wem':        wem
+}
